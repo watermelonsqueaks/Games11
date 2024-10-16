@@ -74,6 +74,35 @@
 		document.body.appendChild(script);
 	</script>
 	
+		<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js" type="text/javascript"></script>
+	<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js" type="text/javascript"></script>
+	<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js" type="text/javascript"></script>
+	<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics-compat.js" type="text/javascript"></script>
+
+	<script type="module">
+	  // Import the functions you need from the SDKs you need
+	  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+	  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
+	  import { getAuth  } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+	  // TODO: Add SDKs for Firebase products that you want to use
+	  // https://firebase.google.com/docs/web/setup#available-libraries
+
+	  // Your web app's Firebase configuration
+	  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+	  const firebaseConfig = {
+		apiKey: "AIzaSyD1uf7Hm-wTPswOjA8YvvEgUSt5JOb2QAI",
+		authDomain: "geometry-lite-v2.firebaseapp.com",
+		projectId: "geometry-lite-v2",
+		storageBucket: "geometry-lite-v2.appspot.com",
+		messagingSenderId: "690168083283",
+		appId: "1:690168083283:web:7e09a82ff0e0adccfae7a6",
+		measurementId: "G-22407FY17B"
+	  };
+	  // Initialize Firebase
+		
+	  const app = firebase.initializeApp(firebaseConfig);
+	  const auth = getAuth(app);
+	</script>
 	
 	 
 
