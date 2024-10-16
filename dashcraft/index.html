@@ -87,13 +87,6 @@
 <script>
     window.devicePixelRatio = 1;
 
-    function loadScript(src, onLoad) {
-      const tag = document.createElement("script");
-      tag.src = src;
-      if (onLoad) tag.onload = () => onLoad();
-      tag.async = true;
-      document.body.appendChild(tag);
-    }
 
 
     let unityGameInstance;
