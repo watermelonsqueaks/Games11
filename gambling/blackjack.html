@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle, #006400, #013220);
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            border: 2px solid #fff;
+            border-radius: 15px;
+            background-color: #2E8B57;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        #game-container:hover {
+            transform: scale(1.02);
+        }
+
+        .button {
+            background-color: #ffcc00;
+            border: none;
+            padding: 12px 25px;
+            color: black;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .button:hover {
+            background-color: #ffaa00;
+            transform: translateY(-3px);
+        }
+
+        #dealer-cards, #player-cards {
+            margin: 20px;
+        }
+
+        .card {
+            display: inline-block;
+            background: linear-gradient(135deg, #fff, #e6e6e6);
+            color: #000;
+            width: 70px;
+            height: 100px;
+            line-height: 100px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .card:hover {
+            transform: rotate(5deg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            animation: fadeInStatus 1s ease;
+        }
+
+        @keyframes fadeInStatus {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #balance {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
+        #bet-input {
+            padding: 10px;
+            font-size: 16px;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+  <div id="game-container">
+    <h1>Blackjack</h1>
+    <div id="balance">Balance: $<span id="balance-amount">3000</span></div>
+    <div>
+        <input type="number" id="bet-input" placeholder="Bet Amount" min="1">
+        <button class="button" id="bet-button">Place Bet</button>
+    </div>
+    <div id="dealer">
+        <h2>Dealer's Hand</h2>
+        <div id="dealer-cards"></div>
+        <div id="dealer-value"></div>
+    </div>
+    <div id="player">
+        <h2>Your Hand</h2>
+        <div id="player-cards"></div>
+        <div id="player-value"></div>
+    </div>
+    <div>
+        <button class="button" id="hit-button">Hit</button>
+        <button class="button" id="stand-button">Stand</button>
+        <button class="button" id="restart-button">Restart</button>
+    </div>
+    <div id="status"></div>
+</div>
+    <script>
+        let balance = 3000;
+        let currentBet = 0;
+        const deck = [];
+        const suits = ["Hearts", "Diamonds", "Clubs", "Spades"];
+        const values = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+
+        let dealerHand = [];
+        let playerHand = [];
+        let gameOver = false;
+
+        // Initialize deck
+        function createDeck() {
+            deck.length = 0;
+            for (let suit of suits) {
+                for (let value of values) {
+                    deck.push({ suit, value });
+                }
+            }
+        }
+
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function startGame() {
+            gameOver = false;
+            dealerHand = [];
+            playerHand = [];
+            document.getElementById("status").innerText = "";
+            document.getElementById("dealer-cards").innerHTML = "";
+            document.getElementById("player-cards").innerHTML = "";
+            document.getElementById("dealer-value").innerText = "";
+            document.getElementById("player-value").innerText = "";
+
+            createDeck();
+            shuffleDeck();
+
+            dealerHand.push(drawCard());
+            dealerHand.push(drawCard());
+            playerHand.push(drawCard());
+            playerHand.push(drawCard());
+
+            renderHands();
+        }
+
+        function drawCard() {
+            return deck.pop();
+        }
+
+        function renderHands() {
+            document.getElementById("dealer-cards").innerHTML = renderCards(dealerHand);
+            document.getElementById("player-cards").innerHTML = renderCards(playerHand);
+            document.getElementById("dealer-value").innerText = "Dealer Value: " + calculateHandValue(dealerHand);
+            document.getElementById("player-value").innerText = "Your Value: " + calculateHandValue(playerHand);
+        }
+
+        function renderCards(hand) {
+            return hand.map(card => {
+                // Convert card details to match image filenames
+                let cardSuit = card.suit.charAt(0).toUpperCase() + card.suit.slice(1).toLowerCase();
+                let cardValue = isNaN(card.value) ? card.value.toUpperCase() : card.value;
+
+                if (cardSuit === "Diamonds") {
+                    cardSuit = "Diamond";
+                }
+                if (cardSuit === "Spades") {
+                    cardSuit = "spade";
+                }
+                if (cardSuit === "Clubs") {
+                    cardSuit = "club";
+                }
+                if (cardSuit === "Hearts") {
+                    cardSuit = "Heart";
+                }
+
+                // Construct image path based on the provided filenames
+                let cardImagePath = `images/PNG/Cards/${cardSuit}_${cardValue}.png`;
+
+                // Return an image element for each card
+                return `<img class="card" src="${cardImagePath}" alt="${card.value} of ${card.suit}">`;
+            }).join("");
+        }
+
+        function calculateHandValue(hand) {
+            let value = 0;
+            let aceCount = 0;
+            for (let card of hand) {
+                if (card.value === "A") {
+                    aceCount++;
+                    value += 11;
+                } else if (["K", "Q", "J"].includes(card.value)) {
+                    value += 10;
+                } else {
+                    value += parseInt(card.value);
+                }
+            }
+            while (value > 21 && aceCount > 0) {
+                value -= 10;
+                aceCount--;
+            }
+            return value;
+        }
+
+        function hit() {
+            if (gameOver) return;
+            playerHand.push(drawCard());
+            renderHands();
+
+            const playerValue = calculateHandValue(playerHand);
+            if (playerValue > 21) {
+                endGame("You Bust! Dealer Wins!");
+                balance -= currentBet;
+                updateBalance();
+            }
+        }
+
+        function stand() {
+            if (gameOver) return;
+            let dealerValue = calculateHandValue(dealerHand);
+            while (dealerValue < 17) {
+                dealerHand.push(drawCard());
+                dealerValue = calculateHandValue(dealerHand);
+            }
+
+            renderHands();
+            determineWinner();
+        }
+
+        function determineWinner() {
+            const playerValue = calculateHandValue(playerHand);
+            const dealerValue = calculateHandValue(dealerHand);
+
+            if (dealerValue > 21) {
+                endGame("Dealer Busts! You Win!");
+                balance += currentBet;
+            } else if (playerValue > dealerValue) {
+                endGame("You Win!");
+                balance += currentBet;
+            } else if (playerValue < dealerValue) {
+                endGame("Dealer Wins!");
+                balance -= currentBet;
+            } else {
+                endGame("It's a Draw!");
+            }
+            updateBalance();
+        }
+
+        function endGame(message) {
+            document.getElementById("status").innerText = message;
+            gameOver = true;
+        }
+
+        function updateBalance() {
+            document.getElementById("balance-amount").innerText = balance;
+        }
+
+        function placeBet() {
+            const betInput = document.getElementById("bet-input").value;
+            const betAmount = parseInt(betInput);
+
+            if (betAmount > 0 && betAmount <= balance) {
+                currentBet = betAmount;
+                startGame();
+            } else {
+                alert("Invalid bet amount. Please enter a value between 1 and your current balance.");
+            }
+        }
+
+        document.getElementById("hit-button").addEventListener("click", hit);
+        document.getElementById("stand-button").addEventListener("click", stand);
+        document.getElementById("restart-button").addEventListener("click", startGame);
+        document.getElementById("bet-button").addEventListener("click", placeBet);
+
+        // Start with balance displayed
+        updateBalance();
+    </script>
+</body>
+</html>
